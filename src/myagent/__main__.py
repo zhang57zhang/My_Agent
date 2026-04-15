@@ -53,7 +53,7 @@ def main() -> None:
         "--provider",
         type=str,
         default=None,
-        help="LLM Provider (zhipu/qwen)",
+        help="LLM Provider (zhipu/qwen/ollama)",
     )
     parser.add_argument(
         "--model",
@@ -66,6 +66,18 @@ def main() -> None:
         type=str,
         default=None,
         help="API Key（也可通过环境变量 MYAGENT_API_KEY 设置）",
+    )
+    parser.add_argument(
+        "--ollama-host",
+        type=str,
+        default=None,
+        help="Ollama 服务地址（IP 或域名），默认 localhost",
+    )
+    parser.add_argument(
+        "--ollama-port",
+        type=int,
+        default=None,
+        help="Ollama 服务端口，默认 11434",
     )
 
     args = parser.parse_args()
@@ -98,9 +110,24 @@ def main() -> None:
             config.providers[config.default_provider] = {}
         config.providers[config.default_provider]["model_id"] = args.model
 
-    # 确保配置了 API Key
+    # Ollama 专用：拼接 base_url，设置默认值
+    if config.default_provider == "ollama":
+        host = args.ollama_host or config.ollama_host
+        port = args.ollama_port or config.ollama_port
+        ollama_base_url = f"http://{host}:{port}/v1"
+        if "ollama" not in config.providers:
+            config.providers["ollama"] = {}
+        config.providers["ollama"]["base_url"] = ollama_base_url
+        if not config.providers["ollama"].get("api_key"):
+            config.providers["ollama"]["api_key"] = "ollama"
+        if "provider_id" not in config.providers["ollama"]:
+            config.providers["ollama"]["provider_id"] = "ollama"
+        if "model_id" not in config.providers["ollama"]:
+            config.providers["ollama"]["model_id"] = "qwen2.5"
+
+    # 确保配置了 API Key（Ollama 不需要）
     provider_cfg = config.providers.get(config.default_provider, {})
-    if not provider_cfg.get("api_key"):
+    if config.default_provider != "ollama" and not provider_cfg.get("api_key"):
         print(f"[错误] 未配置 API Key。请通过以下方式之一配置：")
         print(f"  1. 设置环境变量: MYAGENT_API_KEY=your_key")
         print(f"  2. 命令行参数: --api-key your_key")
@@ -112,7 +139,7 @@ def main() -> None:
     if "provider_id" not in provider_cfg:
         config.providers[config.default_provider]["provider_id"] = config.default_provider
     if "model_id" not in provider_cfg:
-        defaults = {"zhipu": "glm-4-plus", "qwen": "qwen-plus"}
+        defaults = {"zhipu": "glm-4-plus", "qwen": "qwen-plus", "ollama": "qwen2.5"}
         config.providers[config.default_provider]["model_id"] = defaults.get(
             config.default_provider, "glm-4-plus"
         )

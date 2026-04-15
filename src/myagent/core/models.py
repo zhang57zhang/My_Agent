@@ -144,13 +144,14 @@ class SessionInfo(BaseModel):
 class ProviderConfig(BaseModel):
     """LLM Provider 配置."""
 
-    provider_id: str  # e.g. "zhipu", "qwen"
-    model_id: str  # e.g. "glm-4-plus"
+    provider_id: str  # e.g. "zhipu", "qwen", "ollama"
+    model_id: str  # e.g. "glm-4-plus", "qwen2.5"
     api_key: str
     base_url: str | None = None
     temperature: float = 0.7
     max_tokens: int = 4096
     top_p: float = 0.9
+    timeout: float | None = None
 
 
 class LLMResponse(BaseModel):

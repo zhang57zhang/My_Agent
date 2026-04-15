@@ -37,6 +37,11 @@ class MyAgentConfig(BaseModel):
     theme: str = "monokai"
     show_thinking: bool = False
 
+    # Ollama
+    ollama_host: str = "localhost"
+    ollama_port: int = 11434
+    ollama_timeout: float = 120.0
+
     @classmethod
     def load(cls, config_path: Path | None = None) -> MyAgentConfig:
         """从配置文件加载，不存在则使用默认值."""

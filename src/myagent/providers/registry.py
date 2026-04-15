@@ -6,6 +6,7 @@ import logging
 
 from myagent.core.models import ProviderConfig
 from myagent.providers.base import Provider
+from myagent.providers.ollama import OllamaProvider
 from myagent.providers.openai_compat import OpenAICompatProvider
 from myagent.providers.qwen import QwenProvider
 from myagent.providers.zhipu import ZhipuProvider
@@ -17,6 +18,7 @@ _REGISTRY: dict[str, type[OpenAICompatProvider]] = {
     "zhipu": ZhipuProvider,
     "qwen": QwenProvider,
     "openai": OpenAICompatProvider,
+    "ollama": OllamaProvider,
 }
 
 
